@@ -1,0 +1,46 @@
+#######################################
+# Syntax Coloring Map For Excelsior
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Excelsior	KEYWORD1
+E	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+SensorSetup	KEYWORD2
+LichtVerzoegerung	KEYWORD2
+Motor	KEYWORD2
+Knopf	KEYWORD2
+SensorWert	KEYWORD2
+GyroWert	KEYWORD2
+DisplayAktuallisieren	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+AUS	LITERAL1
+WEISS	LITERAL1
+ROT	LITERAL1
+GRUEN	LITERAL1
+BLAU	LITERAL1
+CYAN	LITERAL1
+MAGENTA	LITERAL1
+GELB	LITERAL1
+LICHT	LITERAL1
+LICHT_NXT	LITERAL1
+TAST_NXT	LITERAL1
+TAST_EV3	LITERAL1
+MOTOR_A	LITERAL1
+MOTOR_B	LITERAL1
+MOTOR_C	LITERAL1
+MOTOR_D	LITERAL1
+GYRO_X	LITERAL1
+GYRO_Y	LITERAL1
+GYRO_Z	LITERAL1
