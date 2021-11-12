@@ -42,16 +42,17 @@ Excelsior::Excelsior() : display(128, 64, &Wire2), mpu6050(Wire2){
   Excelsior::DisplayAktuallisieren(-1);
   Excelsior::mpu6050.begin();
   Excelsior::mpu6050.calcGyroOffsets(true);
+  Excelsior::DisplayAktuallisieren(0);
 }
 
 //------SENSOR SETUP------------------
 void Excelsior::SensorSetup(int port, int type){           //Digital- / Analog-Ports
-  if(type >= LICHT && type <= TAST_EV3 && port > 0 && port <= Excelsior::_maxSensors){
-      Excelsior::_sensors[port - 1] = type;                                                                      //LIGHT       LIGHT_NXT       TOUCH_NXT       TOUCH_EV3      KABLECOLOR  (GREEN -> 5V | RED -> GND)
-      pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][0],type == TAST_EV3? INPUT:OUTPUT);               //Red         NULL            NULL            Signal         BLUE
-      pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][1],OUTPUT);                                       //Green       Led             NULL            NULL           YELLOW
-      pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][2],OUTPUT);                                       //Blue        GND             GND             NULL           BLACK
-      pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][3],INPUT_PULLUP);                                 //Signal      Signal          Signal          NULL           WEIß
+  if(type >= LICHT && type <= INFRAROT && port > 0 && port <= Excelsior::_maxSensors){
+      Excelsior::_sensors[port - 1] = type;                                                                                            //LIGHT       LIGHT_NXT       TOUCH_NXT       TOUCH_EV3      INFRAROT      KABLECOLOR  (GREEN -> 5V | RED -> GND)
+      pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][0],(type == TAST_EV3 || type == INFRAROT)? INPUT:OUTPUT);               //Red         NULL            NULL            Signal         Signal        BLUE
+      pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][1],OUTPUT);                                                             //Green       Led             NULL            NULL                         YELLOW
+      pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][2],OUTPUT);                                                             //Blue        GND             GND             NULL                         BLACK
+      pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][3],INPUT_PULLUP);                                                       //Signal      Signal          Signal          NULL                         WEIß
 
       digitalWrite(Excelsior::_pinout[Excelsior::_sensShift + port][0],LOW);         //if defined as INPUT, this disables the internal pullup resistor
       digitalWrite(Excelsior::_pinout[Excelsior::_sensShift + port][1],LOW);
@@ -89,6 +90,10 @@ int Excelsior::SensorWert(int port){
       return Excelsior::_sensorValues[port - 1];
     }else if(Excelsior::_sensors[port - 1] == TAST_NXT){
       Excelsior::_sensorValues[port - 1] = !digitalRead(Excelsior::_pinout[Excelsior::_sensShift + port][3]);
+      return Excelsior::_sensorValues[port - 1];
+    }else if(Excelsior::_sensors[port - 1] == INFRAROT){
+      int pulse = pulseIn(Excelsior::_pinout[Excelsior::_sensShift + port][0], HIGH, 20000);                                    //timeout in microseconds
+      Excelsior::_sensorValues[port - 1] = min(2000, max(0, 2 * (pulse - 1000)));                                               //2000 mm is the maximum that will be returned, anything lower will be calculated
       return Excelsior::_sensorValues[port - 1];
     }
     return SensorWert(port, AUS);
