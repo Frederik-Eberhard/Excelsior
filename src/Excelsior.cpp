@@ -47,7 +47,7 @@ Excelsior::Excelsior() : display(128, 64, &Wire2), mpu6050(Wire2){
 
 //------SENSOR SETUP------------------
 void Excelsior::SensorSetup(int port, int type){           //Digital- / Analog-Ports
-  if(type >= LICHT && type <= TAST_EV3 && port > 0 && port <= Excelsior::_maxSensors){
+  if(type >= LICHT && type <= INFRAROT && port > 0 && port <= Excelsior::_maxSensors){
       Excelsior::_sensors[port - 1] = type;                                                                                            //LIGHT       LIGHT_NXT       TOUCH_NXT       TOUCH_EV3      INFRAROT      KABLECOLOR  (GREEN -> 5V | RED -> GND)
       pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][0],(type == TAST_EV3 || type == INFRAROT)? INPUT:OUTPUT);               //Red         NULL            NULL            Signal         Signal        BLUE
       pinMode(Excelsior::_pinout[Excelsior::_sensShift + port][1],OUTPUT);                                                             //Green       Led             NULL            NULL                         YELLOW
