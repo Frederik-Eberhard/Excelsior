@@ -23,6 +23,7 @@
 #define LICHT_NXT   9
 #define TAST_NXT   10
 #define TAST_EV3   11
+#define INFRAROT   12
 #define MOTOR_A     1
 #define MOTOR_B     2
 #define MOTOR_C     3
