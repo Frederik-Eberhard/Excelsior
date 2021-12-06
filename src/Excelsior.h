@@ -46,8 +46,8 @@ class Excelsior
     int  SensorWert(int port, int color);
     int  SensorWert(int port, int color, bool percent);
     int  GyroWert(int axis);
-    void DisplayAktuallisieren();
-    void DisplayAktuallisieren(int type);
+    void DisplayAktualisieren();
+    void DisplayAktualisieren(int type);
 
   private:
     int  _LightSensorValue(int port, int color);
