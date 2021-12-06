@@ -5,3 +5,4 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
 - Screen now switches away from "Programm startet in 6 Sekunden" after the gyro finished calibrating
 ### Version 1.0.2
 - DisplayAktuallisieren function is renamed to DisplayAktualisieren
+### Version 1.0.3
