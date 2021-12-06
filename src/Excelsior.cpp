@@ -39,10 +39,10 @@ Excelsior::Excelsior() : display(128, 64, &Wire2), mpu6050(Wire2){
   display.dim(0);  //Set brightness (0 is maximun and 1 is a little dim)
 
   Wire2.begin();
-  Excelsior::DisplayAktuallisieren(-1);
+  Excelsior::DisplayAktualisieren(-1);
   Excelsior::mpu6050.begin();
   Excelsior::mpu6050.calcGyroOffsets(true);
-  Excelsior::DisplayAktuallisieren(0);
+  Excelsior::DisplayAktualisieren(0);
 }
 
 //------SENSOR SETUP------------------
@@ -251,11 +251,11 @@ int Excelsior::GyroWert(int axis){
 }
 
 //------OLED DISPLAY------------------
-void Excelsior::DisplayAktuallisieren(){
-  Excelsior::DisplayAktuallisieren(0);
+void Excelsior::DisplayAktualisieren(){
+  Excelsior::DisplayAktualisieren(0);
 }
 
-void Excelsior::DisplayAktuallisieren(int type){
+void Excelsior::DisplayAktualisieren(int type){
   Excelsior::display.clearDisplay();  // Clear the display so we can refresh
   Excelsior::display.setFont(&FreeMono9pt7b);  // Set a custom font
 
