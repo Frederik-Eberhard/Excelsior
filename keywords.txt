@@ -19,7 +19,7 @@ Motor	KEYWORD2
 Knopf	KEYWORD2
 SensorWert	KEYWORD2
 GyroWert	KEYWORD2
-DisplayAktuallisieren	KEYWORD2
+DisplayAktualisieren	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
