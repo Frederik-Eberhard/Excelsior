@@ -255,6 +255,14 @@ void Excelsior::DisplayAktualisieren(){
   Excelsior::DisplayAktualisieren(0);
 }
 
+void Excelsior::DA(){
+  Excelsior::DisplayAktualisieren(0);
+}
+
+void Excelsior::DA(int type){
+  Excelsior::DisplayAktualisieren(type);
+}
+
 void Excelsior::DisplayAktualisieren(int type){
   Excelsior::display.clearDisplay();  // Clear the display so we can refresh
   Excelsior::display.setFont(&FreeMono9pt7b);  // Set a custom font
@@ -290,6 +298,22 @@ void Excelsior::DisplayAktualisieren(int type){
     if(Excelsior::_sensorValues[Excelsior::_maxSensors+3]){                               //displays a outline to show if the button is pressed
       Excelsior::display.drawRect(0, 0, 128, 64, WHITE);
     }
+  }else if(type == 2){                                            //shows custom text
+    Excelsior::display.setTextSize(0);
+    for(int y = 0; y < Excelsior::_DisplayY; y++){
+      for(int x = 0; x < Excelsior::_DisplayX; x++){
+        Excelsior::display.setCursor(1 + 12*x, 12 + 16*y);
+        Excelsior::display.println(Excelsior::_Display[x][y]);
+      }
+    }
   }
   Excelsior::display.display();  // Print everything we set previously
+}
+
+void Excelsior::DisplayText(int x_, int y_, String s_){
+  if(x_ >= 0 && x_ < Excelsior::_DisplayX && y_ >= 0 && y_ < Excelsior::_DisplayY){
+    Excelsior::_Display[x_][y_] = s_;
+  }else{
+    Serial.println((String)"Die Display-Position " + x_ + "  " + y_ + " ist nicht definiert");
+  }
 }
