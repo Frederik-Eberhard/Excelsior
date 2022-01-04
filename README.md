@@ -10,3 +10,5 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
 ### Version 1.0.4
 - Added function DisplayText for enabling custom Text to be displayed on the Display
 - Added function DA as a shorthand for DisplayAktualisieren
+### Version 1.0.5
+- Removed unecessary "Excelsior::" from cpp file
