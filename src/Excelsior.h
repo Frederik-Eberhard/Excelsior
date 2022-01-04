@@ -47,7 +47,11 @@ class Excelsior
     int  SensorWert(int port, int color, bool percent);
     int  GyroWert(int axis);
     void DisplayAktualisieren();
+    void DA();
     void DisplayAktualisieren(int type);
+    void DA(int type);
+    void DisplayText(int x_, int y_, String s_);
+
 
   private:
     int  _LightSensorValue(int port, int color);
@@ -78,13 +82,15 @@ class Excelsior
     static const int _sensShift = 4;//1;                        //number needed to be added to port for mapping to the pinout
     static const int _maxSensors = 8;//1;
     static const int _maxMotors = 4;//1;
+    static const int _DisplayX  = 10;
+    static const int _DisplayY  =  4;
     int _lightDelay = 1;                                  //not realy neccessary to have a higher number, as even 1 millisecond doesnt reduce the quality of the brightnesvalue
 
     int _sensors[_maxSensors];
     int _sensorValues[_maxSensors + 4];                   //stores the values of all sensors, the gyroscope and the button
     int _motorSpeeds[_maxMotors];                         //stores the speed / direction of each motor
 
-    String _Display[10][4];                               //stores what is supposed to be shown on the display
+    String _Display[_DisplayX][_DisplayY];                //stores what is supposed to be shown on the display
 };
 
 #endif
