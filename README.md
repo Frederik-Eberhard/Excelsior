@@ -7,3 +7,6 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
 - DisplayAktuallisieren function is renamed to DisplayAktualisieren
 ### Version 1.0.3
 - Added Adafruit_SSD1306 in dependencies
+### Version 1.0.4
+- Added function DisplayText for enabling custom Text to be displayed on the Display
+- Added function DA as a shorthand for DisplayAktualisieren
