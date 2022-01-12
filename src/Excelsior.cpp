@@ -18,6 +18,9 @@ Excelsior::Excelsior() : display(128, 64, &Wire2), mpu6050(Wire2){
   for(int i = 0; i < _maxSensors; i++){
     _sensors[i] = -1;                        //initiallises array as empty
   }
+  _sensorValues[_maxSensors + 3] = 0;        //setting the Gyroscope Reset Values
+  _sensorValues[_maxSensors + 4] = 0;
+  _sensorValues[_maxSensors + 5] = 0;
 
   pinMode(_pinout[_sensShift][2], INPUT);     //internal Button
 
@@ -79,8 +82,9 @@ void Excelsior::Motor(int port, int dir){
 
 //------READING SENSORS------
 bool Excelsior::Knopf(){
-  _sensorValues[_maxSensors + 3] = !digitalRead(_pinout[_sensShift][2]);
-  return _sensorValues[_maxSensors + 3];
+  _sensorValues[_maxSensors + 6] = !digitalRead(_pinout[_sensShift][2]);
+  _displayOutline = _sensorValues[_maxSensors + 6];
+  return _sensorValues[_maxSensors + 6];
 }
 
 int Excelsior::SensorWert(int port){
@@ -240,14 +244,67 @@ long Excelsior::_LightSensorPercent(int port, int color){
 
 //------MPU 6050------
 int Excelsior::GyroWert(int axis){
+  return GyroWert(axis, false);
+}
+
+int Excelsior::GyroWert(int axis, bool autoreset){    //0,1,2 --> The returned and displayed Values ;  3,4,5 --> The offset of the actual Value and the desired Value
   mpu6050.update();
-  _sensorValues[_maxSensors + 0] = mpu6050.getAngleX();
-  _sensorValues[_maxSensors + 1] = mpu6050.getAngleY();
-  _sensorValues[_maxSensors + 2] = mpu6050.getAngleZ();
+  int x = mpu6050.getAngleX();           //original Values X
+  int y = mpu6050.getAngleY();           //original Values Y
+  int z = mpu6050.getAngleZ();           //original Values Z
+
+  if(autoreset){
+    _gyroCalls++;
+    if(_gyroCalls % _gyroresetDelay == 0){
+      GyroReset();
+    }
+  }
+
+  _sensorValues[_maxSensors + 0] = x - _sensorValues[_maxSensors + 3];
+  _sensorValues[_maxSensors + 1] = y - _sensorValues[_maxSensors + 4];
+  _sensorValues[_maxSensors + 2] = z - _sensorValues[_maxSensors + 5];
+
   if(axis >= GYRO_X && axis <= GYRO_Z)                             //looks if axis is between X and Z
     return _sensorValues[_maxSensors + axis];
   Serial.println((String)"Die Gyroskopachse " + axis + " ist nicht definiert");
   return -1;
+}
+
+Excelsior::GyroReset(){
+  GyroReset(-1);
+}
+
+Excelsior::GyroReset(int axis){
+  GyroReset(axis,false);
+}
+
+Excelsior::GyroReset(int axis, bool toOriginal){          //Resets the Gyroscope Values (if toOriginal --> reverts back to the actual gyroscope Values by setting the offsets to 0)
+  mpu6050.update();
+  int x = mpu6050.getAngleX();           //original Values X
+  int y = mpu6050.getAngleY();           //original Values Y
+  int z = mpu6050.getAngleZ();           //original Values Z
+  switch(axis){
+    case GYRO_X:  _sensorValues[_maxSensors + 3] = toOriginal? 0 : x;
+                  break;
+
+    case GYRO_Y:  _sensorValues[_maxSensors + 4] = toOriginal? 0 : y;
+                  break;
+
+    case GYRO_Z:  _sensorValues[_maxSensors + 5] = toOriginal? 0 : z;
+                  break;
+
+    default:      _sensorValues[_maxSensors + 3] = toOriginal? 0 : x;
+                  _sensorValues[_maxSensors + 4] = toOriginal? 0 : y;
+                  _sensorValues[_maxSensors + 5] = toOriginal? 0 : z;
+                  break;
+  }
+  _sensorValues[_maxSensors + 0] = x - _sensorValues[_maxSensors + 3];
+  _sensorValues[_maxSensors + 1] = y - _sensorValues[_maxSensors + 4];
+  _sensorValues[_maxSensors + 2] = z - _sensorValues[_maxSensors + 5];
+}
+
+Excelsior::GyroVerzoegerung(int delay){
+  _gyroresetDelay = delay;
 }
 
 //------OLED DISPLAY------------------
@@ -295,7 +352,7 @@ void Excelsior::DisplayAktualisieren(int type){
           display.println(i < _maxMotors? _motorSpeeds[i]:_sensorValues[_maxSensors + i - _maxMotors]);
       }
     }
-    if(_sensorValues[_maxSensors+3]){                               //displays a outline to show if the button is pressed
+    if(_displayOutline){                               //displays a outline to show if the button is pressed
       display.drawRect(0, 0, 128, 64, WHITE);
     }
   }else if(type == 2){                                            //shows custom text
@@ -310,10 +367,22 @@ void Excelsior::DisplayAktualisieren(int type){
   display.display();  // Print everything we set previously
 }
 
+void Excelsior::DT(int x_, int y_, String s_){
+  DisplayText(x_,y_,s_);
+}
+
 void Excelsior::DisplayText(int x_, int y_, String s_){
   if(x_ >= 0 && x_ < _DisplayX && y_ >= 0 && y_ < _DisplayY){
     _Display[x_][y_] = s_;
   }else{
     Serial.println((String)"Die Display-Position " + x_ + "  " + y_ + " ist nicht definiert");
   }
+}
+
+void Excelsior::DR(){
+  DisplayRand();
+}
+
+void Excelsior::DisplayRand(){
+    _displayOutline = !_displayOutline;
 }

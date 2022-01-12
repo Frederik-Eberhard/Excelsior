@@ -46,11 +46,19 @@ class Excelsior
     int  SensorWert(int port, int color);
     int  SensorWert(int port, int color, bool percent);
     int  GyroWert(int axis);
+    int  GyroWert(int axis, bool autoreset);
+    void GyroReset();
+    void GyroReset(int axis);
+    void GyroReset(int axis, bool toOriginal);
+    void GyroVerzoegerung(int delay);
     void DisplayAktualisieren();
     void DA();
-    void DisplayAktualisieren(int type);
     void DA(int type);
+    void DisplayAktualisieren(int type);
+    void DT(int x_, int y_, String s_);
     void DisplayText(int x_, int y_, String s_);
+    void DR();
+    void DisplayRand();
 
 
   private:
@@ -85,12 +93,15 @@ class Excelsior
     static const int _DisplayX  = 10;
     static const int _DisplayY  =  4;
     int _lightDelay = 1;                                  //not realy neccessary to have a higher number, as even 1 millisecond doesnt reduce the quality of the brightnesvalue
+    int _gyroresetDelay = 100;
+    int _gyroCalls = 0;
 
     int _sensors[_maxSensors];
-    int _sensorValues[_maxSensors + 4];                   //stores the values of all sensors, the gyroscope and the button
+    int _sensorValues[_maxSensors + 7];                   //stores the values of all sensors, the used gyroscope values the gyroscope reset values and the button
     int _motorSpeeds[_maxMotors];                         //stores the speed / direction of each motor
 
     String _Display[_DisplayX][_DisplayY];                //stores what is supposed to be shown on the display
+    bool _displayOutline = false;
 };
 
 #endif
