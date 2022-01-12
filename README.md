@@ -16,8 +16,7 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
 - Added further features to Gyroscope:
   - Autoreset : enables that every fixed number of functioncalls all gyroValues are reset to 0. The fixed  number is stored in *gyroresetDelay*
   - GyroVerzoegerung(int) : sets the *gyroresetDelay* to the given parameter
-  - GyroReset(int) : enables the resetting of gyroValues without enabling autoreset and also disabling the gyroOffset again
+  - GyroReset(int,bool) : enables the resetting of gyroValues without enabling autoreset and also disabling the gyroOffset again
 - Added features to Display:
   - Now possible to display the DisplayOutline with DisplayRand() or DR()
   - Default is still the button press if Knop() is called in main
-- SensorValues is bigger, now storing displayed GyroValues and also the GyroOffset
