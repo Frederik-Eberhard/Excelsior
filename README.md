@@ -19,4 +19,4 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
   - GyroReset(int,bool) : enables the resetting of gyroValues without enabling autoreset and also disabling the gyroOffset again
 - Added features to Display:
   - Now possible to display the DisplayOutline with DisplayRand() or DR()
-  - Default is still the button press if Knop() is called in main
+  - Default is still the button press if Knopf() is called in main
