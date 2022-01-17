@@ -270,15 +270,15 @@ int Excelsior::GyroWert(int axis, bool autoreset){    //0,1,2 --> The returned a
   return -1;
 }
 
-Excelsior::GyroReset(){
+void Excelsior::GyroReset(){
   GyroReset(-1);
 }
 
-Excelsior::GyroReset(int axis){
+void Excelsior::GyroReset(int axis){
   GyroReset(axis,false);
 }
 
-Excelsior::GyroReset(int axis, bool toOriginal){          //Resets the Gyroscope Values (if toOriginal --> reverts back to the actual gyroscope Values by setting the offsets to 0)
+void Excelsior::GyroReset(int axis, bool toOriginal){          //Resets the Gyroscope Values (if toOriginal --> reverts back to the actual gyroscope Values by setting the offsets to 0)
   mpu6050.update();
   int x = mpu6050.getAngleX();           //original Values X
   int y = mpu6050.getAngleY();           //original Values Y
@@ -303,7 +303,7 @@ Excelsior::GyroReset(int axis, bool toOriginal){          //Resets the Gyroscope
   _sensorValues[_maxSensors + 2] = z - _sensorValues[_maxSensors + 5];
 }
 
-Excelsior::GyroVerzoegerung(int delay){
+void Excelsior::GyroVerzoegerung(int delay){
   _gyroresetDelay = delay;
 }
 
