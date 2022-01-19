@@ -20,3 +20,5 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
 - Added features to Display:
   - Now possible to display the DisplayOutline with DisplayRand() or DR()
   - Default is still the button press if Knopf() is called in main
+### Version 1.0.7
+- Bug Fixes
