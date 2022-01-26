@@ -256,7 +256,12 @@ int Excelsior::GyroWert(int axis, bool autoreset){    //0,1,2 --> The returned a
   if(autoreset){
     _gyroCalls++;
     if(_gyroCalls % _gyroresetDelay == 0){
-      GyroReset();
+      if(absolute(x) < _gyroSpan[0] || absolute(x) > _gyroSpan[1])
+        GyroReset(GYRO_X);
+      if(absolute(y) < _gyroSpan[0] || absolute(y) > _gyroSpan[1])
+        GyroReset(GYRO_X);
+      if(absolute(z) < _gyroSpan[0] || absolute(z) > _gyroSpan[1])
+        GyroReset(GYRO_X);
     }
   }
 
@@ -306,6 +311,12 @@ void Excelsior::GyroReset(int axis, bool toOriginal){          //Resets the Gyro
 void Excelsior::GyroVerzoegerung(int delay){
   _gyroresetDelay = delay;
 }
+
+void Excelsior::GyroResetSpann(int a, int b){
+  _gyroSpan[0] = a;
+  _gyroSpan[1] = b;
+}
+
 
 //------OLED DISPLAY------------------
 void Excelsior::DisplayAktualisieren(){

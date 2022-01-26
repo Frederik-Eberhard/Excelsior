@@ -51,6 +51,7 @@ class Excelsior
     void GyroReset(int axis);
     void GyroReset(int axis, bool toOriginal);
     void GyroVerzoegerung(int delay);
+    void GyroResetSpann(int a, int b);
     void DisplayAktualisieren();
     void DA();
     void DA(int type);
@@ -95,6 +96,7 @@ class Excelsior
     int _lightDelay = 1;                                  //not realy neccessary to have a higher number, as even 1 millisecond doesnt reduce the quality of the brightnesvalue
     int _gyroresetDelay = 100;
     int _gyroCalls = 0;
+    int _gyroSpan[2] = {10,200};                             //a Span, where if gyroValues fall inside of it, they wont get reset by autoreset
 
     int _sensors[_maxSensors];
     int _sensorValues[_maxSensors + 7];                   //stores the values of all sensors, the used gyroscope values the gyroscope reset values and the button
@@ -103,5 +105,16 @@ class Excelsior
     String _Display[_DisplayX][_DisplayY];                //stores what is supposed to be shown on the display
     bool _displayOutline = false;
 };
+
+template<typename type> type absolute(type v){
+  if(v < 0)
+    return -1 * v;
+  return v;
+}
+
+template double absolute(double);
+template int absolute(int);
+template float absolute(float);
+template long absolute(long);
 
 #endif

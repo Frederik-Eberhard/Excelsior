@@ -22,3 +22,8 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
   - Default is still the button press if Knopf() is called in main
 ### Version 1.0.7
 - Bug Fixes
+### Version 1.0.8
+- Added more function to autoreset of the gyro:
+  - gyroSpan now sets an interval in which the autoreset doesn't reset: defaul interval is [10,200]. Note that this deals with the absolute gyroValues
+  - Added function GyroResetSpann(int, int) to manually set this interval
+- Added function absolute that is not part of the Excelsior class, which returns the absolute Value of any int, double, float, long
