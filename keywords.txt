@@ -21,12 +21,15 @@ SensorWert	KEYWORD2
 GyroWert	KEYWORD2
 GyroReset	KEYWORD2
 GyroVerzoegerung	KEYWORD2
+GyroResetSpann	KEYWORD2
 DisplayAktualisieren	KEYWORD2
 DA	KEYWORD2
 DisplayText	KEYWORD2
 DT	KEYWORD2
 DisplayRand	KEYWORD2
 DR	KEYWORD2
+absolute	KEYWORD2
+
 
 #######################################
 # Constants (LITERAL1)
