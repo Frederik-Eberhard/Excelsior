@@ -259,9 +259,9 @@ int Excelsior::GyroWert(int axis, bool autoreset){    //0,1,2 --> The returned a
       if(absolute(x) < _gyroSpan[0] || absolute(x) > _gyroSpan[1])
         GyroReset(GYRO_X);
       if(absolute(y) < _gyroSpan[0] || absolute(y) > _gyroSpan[1])
-        GyroReset(GYRO_X);
+        GyroReset(GYRO_Y);
       if(absolute(z) < _gyroSpan[0] || absolute(z) > _gyroSpan[1])
-        GyroReset(GYRO_X);
+        GyroReset(GYRO_Z);
     }
   }
 
