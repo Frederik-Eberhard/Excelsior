@@ -394,3 +394,10 @@ void Excelsior::DR(){
 void Excelsior::DisplayRand(){
     _displayOutline = !_displayOutline;
 }
+
+void Excelsior::Wait(int delay){      //acts like a regular delay while making sure, that the MPU continues to update to work reliably
+  int current = mills();
+  while(mills() - current < delay){
+    mpu6050.update();
+  }
+}
