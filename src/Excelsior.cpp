@@ -396,8 +396,8 @@ void Excelsior::DisplayRand(){
 }
 
 void Excelsior::Wait(int delay){      //acts like a regular delay while making sure, that the MPU continues to update to work reliably
-  int current = mills();
-  while(mills() - current < delay){
+  int current = millis();
+  while(millis() - current < delay){
     mpu6050.update();
   }
 }
