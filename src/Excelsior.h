@@ -60,6 +60,7 @@ class Excelsior
     void DisplayText(int x_, int y_, String s_);
     void DR();
     void DisplayRand();
+    void Wait(int delay);
 
 
   private:
@@ -96,7 +97,7 @@ class Excelsior
     int _lightDelay = 1;                                  //not realy neccessary to have a higher number, as even 1 millisecond doesnt reduce the quality of the brightnesvalue
     int _gyroresetDelay = 100;
     int _gyroCalls = 0;
-    int _gyroSpan[2] = {10,200};                             //a Span, where if gyroValues fall inside of it, they wont get reset by autoreset
+    int _gyroSpan[2] = {10, 200};                         //a Span, where if gyroValues fall inside of it, they wont get reset by autoreset
 
     int _sensors[_maxSensors];
     int _sensorValues[_maxSensors + 7];                   //stores the values of all sensors, the used gyroscope values the gyroscope reset values and the button
