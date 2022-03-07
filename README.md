@@ -29,3 +29,5 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
 - Added function absolute that is not part of the Excelsior class, which returns the absolute Value of any int, double, float, long
 ### Version 1.0.9
 - Bug Fixes
+### Version 1.1.0
+- Added Wait function that acts like a regular delay while making sure, that the MPU continues to update to work reliably
