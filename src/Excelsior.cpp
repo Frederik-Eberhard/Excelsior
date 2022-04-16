@@ -96,7 +96,7 @@ int Excelsior::SensorWert(int port){
       _sensorValues[port - 1] = !digitalRead(_pinout[_sensShift + port][3]);
       return _sensorValues[port - 1];
     }else if(_sensors[port - 1] == INFRAROT){
-      int pulse = pulseIn(_pinout[_sensShift + port][0], HIGH, 20000);                                    //timeout in microseconds
+      int pulse = pulseIn(_pinout[_sensShift + port][3], HIGH, 20000);                                    //timeout in microseconds
       _sensorValues[port - 1] = min(2000, max(0, 2 * (pulse - 1000)));                                               //2000 mm is the maximum that will be returned, anything lower will be calculated
       return _sensorValues[port - 1];
     }
