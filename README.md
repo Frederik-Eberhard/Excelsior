@@ -33,3 +33,5 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
 - Added Wait function that acts like a regular delay while making sure, that the MPU continues to update to work reliably
 ### Version 1.1.1
 -  Bug Fixes
+### Version 1.1.2
+- Sensorport change of the Infrarot-Sensor
