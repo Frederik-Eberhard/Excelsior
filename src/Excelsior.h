@@ -11,26 +11,26 @@
 #include <Fonts/FreeMono9pt7b.h>  // Add a custom font
 
 //define what color is which number for the switch cases and also what variables are used here
-#define AUS         0
-#define WEISS       1
-#define ROT         2
-#define GRUEN       3
-#define BLAU        4
-#define CYAN        5
-#define MAGENTA     6
-#define GELB        7
-#define LICHT       8
-#define LICHT_NXT   9
-#define TAST_NXT   10
-#define TAST_EV3   11
-#define INFRAROT   12
-#define MOTOR_A     1
-#define MOTOR_B     2
-#define MOTOR_C     3
-#define MOTOR_D     4
-#define GYRO_X      0
-#define GYRO_Y      1
-#define GYRO_Z      2
+#define AUS          0
+#define WEISS        1
+#define ROT          2
+#define GRUEN        3
+#define BLAU         4
+#define CYAN         5
+#define MAGENTA      6
+#define GELB         7
+#define LICHT        8
+#define LICHT_NXT    9
+#define TAST_NXT    10
+#define TAST_EV3    11
+#define INFRAROT    12
+#define MOTOR_A     13
+#define MOTOR_B     14
+#define MOTOR_C     15
+#define MOTOR_D     16
+#define GYRO_X      17
+#define GYRO_Y      18
+#define GYRO_Z      19
 
 class Excelsior
 {
@@ -56,6 +56,8 @@ class Excelsior
     void DA();
     void DA(int type);
     void DisplayAktualisieren(int type);
+    void DA(int (&layout)[8]);
+    void DisplayAktualisieren(int (&layout)[8])
     void DT(int x_, int y_, String s_);
     void DisplayText(int x_, int y_, String s_);
     void DR();
@@ -74,15 +76,14 @@ class Excelsior
                                 ,{11,10, 4}       //      |
                                 ,{29,28, 5}       //      |
                                 ,{24,25,12}       //---Internal I2C  (SCL2,SDA2) + Button
-                                ,{13,14,15,23}    //---Sensors       (3x Digital, 1x Analog)  //Blue, Yellow ,Black ,White
-                                ,{36,37,38,22}    //      |
-                                ,{33,34,35,21}    //      |
-                                ,{32,31,30,20}    //      |
-                                ,{49,50,48,41}    //      |
-                                ,{52,54,53,40}    //      |
-                                ,{51,26,27,39}    //      |
-                                ,{17,18,19,16}};  //---Open I2C      (SDA1,SDA,SCL,SCL1)
-
+                                ,{13,14,15,23}    //1---Sensors       (3x Digital, 1x Analog)  //Blue, Yellow ,Black ,White
+                                ,{36,37,38,22}    //2      |
+                                ,{33,34,35,21}    //3      |
+                                ,{32,31,30,20}    //4      |
+                                ,{52,54,53,41}    //5      |
+                                ,{50,48,51,40}    //6      |
+                                ,{49,26,27,39}    //7      |
+                                ,{17,18,19,16}};  //8---Open I2C      (SDA1,SDA,SCL,SCL1)
     //Tennsy 3.2 Pinout
     /*
     const int _pinout[3][4]={{ 3, 4, 5},
@@ -99,7 +100,7 @@ class Excelsior
     int _gyroCalls = 0;
     int _gyroSpan[2] = {10, 200};                         //a Span, where if gyroValues fall inside of it, they wont get reset by autoreset
 
-    int _sensors[_maxSensors];
+    int _sensors[_maxSensors];                            //stores the type of a sensor and if it hasn't been initialized it will be -1
     int _sensorValues[_maxSensors + 7];                   //stores the values of all sensors, the used gyroscope values the gyroscope reset values and the button
     int _motorSpeeds[_maxMotors];                         //stores the speed / direction of each motor
 
