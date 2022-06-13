@@ -1,5 +1,5 @@
 # Excelsior
-Arduino Library to enable easy use of the Excelsior-Brick thought as a replacement of the LEGO-EV3
+Arduino Library to enable easy use of the Excelsior-Brick.
 ### Version 1.0.1
 - Added Infrared-Sensor compatability
 - Screen now switches away from "Programm startet in 6 Sekunden" after the gyro finished calibrating
@@ -35,3 +35,7 @@ Arduino Library to enable easy use of the Excelsior-Brick thought as a replaceme
 -  Bug Fixes
 ### Version 1.1.2
 - Sensorport change of the Infrarot-Sensor
+### Version 1.1.3
+- Refurbished the way that the Matrix on the Display is generated
+- Custom order of the sensors and motors now able to be displayed in the Matrix-View
+- Small Bug-Fixes to the pinout 
