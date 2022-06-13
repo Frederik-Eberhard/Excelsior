@@ -316,54 +316,78 @@ void Excelsior::GyroResetSpann(int a, int b){
 
 
 //------OLED DISPLAY------------------
+void Excelsior::DA(){
+  DisplayAktualisieren(0);
+}
+
 void Excelsior::DisplayAktualisieren(){
   DisplayAktualisieren(0);
 }
 
-void Excelsior::DA(){
-  DisplayAktualisieren(0);
+void Excelsior::DA(int layout1, int layout2, int layout3, int layout4, int layout5, int layout6, int layout7, int layout8){
+  DisplayAktualisieren(layout1,layout2,layout3,layout4,layout5,layout6,layout7,layout8);
+}
+
+void Excelsior::DisplayAktualisieren(int layout1, int layout2, int layout3, int layout4, int layout5, int layout6, int layout7, int layout8){
+  int layout[] =  {layout1,layout2,layout3,layout4,layout5,layout6,layout7,layout8};
+  DisplayAktualisieren(layout);
 }
 
 void Excelsior::DA(int type){
   DisplayAktualisieren(type);
 }
 
-void Excelsior::DisplayAktualisieren(int type){
-  display.clearDisplay();  // Clear the display so we can refresh
-  display.setFont(&FreeMono9pt7b);  // Set a custom font
+void Excelsior::DisplayAktualisieren(int type){     //definiert presets
+  int layout[8];
+  switch(type){
+    case -1:                    //shows bootup
+      layout[0] = -1; break;
+    case 2:                     //shows custom text
+      layout[0] = -2; break;
+    case 0:                     //shows all sensors
+      layout[0] = 1;
+      layout[1] = 2;
+      layout[2] = 3;
+      layout[3] = 4;
+      layout[4] = 5;
+      layout[5] = 6;
+      layout[6] = 7;
+      layout[7] = 8;
+      break;
+    case 1:                     //shows all motors and gyroscopes
+      layout[0] = MOTOR_A;
+      layout[1] = MOTOR_B;
+      layout[2] = MOTOR_C;
+      layout[3] = MOTOR_D;
+      layout[4] = GYRO_X;
+      layout[5] = GYRO_Y;
+      layout[6] = GYRO_Z;
+      layout[7] = 0;                //last entry is not displayed
+      break;
+    default:                        //default displays NOTHING
+      for(int i = 0; i < 8; i++){
+        layout[i] = 0;
+      }
+      break;
+  }
+  DisplayAktualisieren(layout);
+}
 
-  if(      type == -1){                                          //bootup display
+
+void Excelsior::DA(int (&layout)[8]){
+  DisplayAktualisieren(layout);
+}
+
+void Excelsior::DisplayAktualisieren(int (&layout)[8]){          //array of length 8 that determines the order of displayed entries (only takes arrays of this length)
+  display.clearDisplay();                                        // Clear the display so we can refresh
+  display.setFont(&FreeMono9pt7b);                               // Set a custom font
+
+  if(layout[0] == -1){                                           //-1 at the first index cause the bootup screen
     display.setTextSize(1);
     display.setCursor(0,10);
     display.println("  Programm \n startet in \n 6 Sekunden");
 
-  }else if(type == 0 || type == 1){                              //standard display (shows all 8 Sensors || shows all 4 Motors and the gyroscope values)
-    for(int i = 0; i < 8; i++){                                  //shows all sensorvalues -> if less then 8 ports, then the last three are the gyroscope values
-      display.setTextSize(0);
-      display.drawRoundRect((i < 4)? 0:65,  0 + 16*(i % 4), 13, 15, 1, WHITE);
-      display.setCursor((i < 4)? 1:66, 12 + 16*(i % 4));
-      if(!type){                                                 //if it shows the sensors
-        display.println(i+1);
-      }else{                                                     //if it shows the motors
-        if(i < _maxMotors + 3){
-          char c = i < _maxMotors? 'A' + i:'X' + i - _maxMotors;
-          display.println(c);
-        }
-      }
-      display.setCursor((i < 4)? 17:82, 12 + 16*(i % 4));
-      if(!type){                                                  //if it shows the sensors
-        if(i < _maxSensors + 3 && ((i < _maxSensors)? _sensors[i] != -1:true)){        //if there is no sensor connected or if i is bigger than maxSensors + gyroscope, nothing will be displayed
-          display.println(_sensorValues[i]);
-        }
-      }else{                                                      //if it shows the motors
-        if(i < _maxMotors + 3)
-          display.println(i < _maxMotors? _motorSpeeds[i]:_sensorValues[_maxSensors + i - _maxMotors]);
-      }
-    }
-    if(_displayOutline){                               //displays a outline to show if the button is pressed
-      display.drawRect(0, 0, 128, 64, WHITE);
-    }
-  }else if(type == 2){                                            //shows custom text
+  }else if(layout[1] < -2){                                       //negative numbers at the second index enables custom text
     display.setTextSize(0);
     for(int y = 0; y < _DisplayY; y++){
       for(int x = 0; x < _DisplayX; x++){
@@ -371,8 +395,39 @@ void Excelsior::DisplayAktualisieren(int type){
         display.println(_Display[x][y]);
       }
     }
+
+  }else{
+    for(int i = 0; i < 8; i++){                                  //shows all sensorvalues -> if less then 8 ports, then the last three are the gyroscope values
+      if(layout[i] == 0)
+        continue;                                                //displays NOTHING if the entry is 0
+
+      display.setTextSize(0);
+      display.drawRoundRect((i < 4)? 0:65,  0 + 16*(i % 4), 13, 15, 1, WHITE);
+      float positionBox = (i < 4)? 1:66, 12 + 16*(i % 4);        //Shows the Character in the square Box
+      float positionValue = (i < 4)? 17:82, 12 + 16*(i % 4);     //Shows the value after the Box
+
+      display.setCursor(positionOne);
+      if(layout[i] >= 1 && layout[i] <= 8){                      //if the Sensors are displayed ( 1 - 8)
+        display.println(layout[i]);
+        display.setCursor((i < 4)? 17:82, 12 + 16*(i % 4));
+        display.println(_sensorValues[layout[i] - 1]);          //corrects the of by one input
+
+      }else if(layout[i] >= MOTOR_A && layout[i] <= MOTOR_D){    //if the Motors are displayed
+        display.println(char('A' + layout[i] - MOTOR_A));
+        display.setCursor((i < 4)? 17:82, 12 + 16*(i % 4));
+        display.println(_motorSpeeds[layout[i] - MOTOR_A]);
+
+      }else if(layout[i] >= GYRO_X && layout[i] <= GYRO_Y){      //if the Gyroscope is displayed
+        display.println(char('X' + layout[i] - GYRO_X));
+        display.setCursor((i < 4)? 17:82, 12 + 16*(i % 4));
+        display.println(_sensorValues[_maxSensors + layout[i] - GYRO_X]);
+      }
+    }
   }
-  display.display();  // Print everything we set previously
+  if(_displayOutline){                                           //displays a outline to show if the button is pressed
+    display.drawRect(0, 0, 128, 64, WHITE);
+  }
+  display.display();                                             // Print everything we set previously
 }
 
 void Excelsior::DT(int x_, int y_, String s_){
@@ -395,8 +450,8 @@ void Excelsior::DisplayRand(){
     _displayOutline = !_displayOutline;
 }
 
-void Excelsior::Wait(int delay){      //acts like a regular delay while making sure, that the MPU continues to update to work reliably
-  int current = millis();
+void Excelsior::Wait(unsigned int delay){      //acts like a regular delay while making sure, that the MPU continues to update to work reliably
+  unsigned int current = millis();
   while(millis() - current < delay){
     mpu6050.update();
   }
