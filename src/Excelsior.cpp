@@ -267,7 +267,7 @@ int Excelsior::GyroWert(int axis, bool autoreset){    //0,1,2 --> The returned a
   _sensorValues[_maxSensors + 2] = z - _sensorValues[_maxSensors + 5];
 
   if(axis >= GYRO_X && axis <= GYRO_Z)                             //looks if axis is between X and Z
-    return _sensorValues[_maxSensors + axis];
+    return _sensorValues[_maxSensors + axis - GYRO_X];
   Serial.println((String)"Die Gyroskopachse " + axis + " ist nicht definiert");
   return -1;
 }
@@ -403,23 +403,24 @@ void Excelsior::DisplayAktualisieren(int (&layout)[8]){          //array of leng
 
       display.setTextSize(0);
       display.drawRoundRect((i < 4)? 0:65,  0 + 16*(i % 4), 13, 15, 1, WHITE);
-      float positionBox = (i < 4)? 1:66, 12 + 16*(i % 4);        //Shows the Character in the square Box
-      float positionValue = (i < 4)? 17:82, 12 + 16*(i % 4);     //Shows the value after the Box
+      int positionBoxX = (i < 4)? 1:66;        //Shows the Character in the square Box
+      int positionValueX = (i < 4)? 17:82;     //Shows the value after the Box
+      int positionY = 12 + 16*(i % 4);
 
-      display.setCursor(positionOne);
+      display.setCursor(positionBoxX, positionY);
       if(layout[i] >= 1 && layout[i] <= 8){                      //if the Sensors are displayed ( 1 - 8)
         display.println(layout[i]);
-        display.setCursor((i < 4)? 17:82, 12 + 16*(i % 4));
+        display.setCursor(positionValueX, positionY);
         display.println(_sensorValues[layout[i] - 1]);          //corrects the of by one input
 
       }else if(layout[i] >= MOTOR_A && layout[i] <= MOTOR_D){    //if the Motors are displayed
         display.println(char('A' + layout[i] - MOTOR_A));
-        display.setCursor((i < 4)? 17:82, 12 + 16*(i % 4));
+        display.setCursor(positionValueX, positionY);
         display.println(_motorSpeeds[layout[i] - MOTOR_A]);
 
       }else if(layout[i] >= GYRO_X && layout[i] <= GYRO_Y){      //if the Gyroscope is displayed
         display.println(char('X' + layout[i] - GYRO_X));
-        display.setCursor((i < 4)? 17:82, 12 + 16*(i % 4));
+        display.setCursor(positionValueX, positionY);
         display.println(_sensorValues[_maxSensors + layout[i] - GYRO_X]);
       }
     }
