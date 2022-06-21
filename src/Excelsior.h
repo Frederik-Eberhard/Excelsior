@@ -57,12 +57,14 @@ class Excelsior
     void DA(int type);
     void DisplayAktualisieren(int type);
     void DA(int (&layout)[8]);
-    void DisplayAktualisieren(int (&layout)[8])
+    void DisplayAktualisieren(int (&layout)[8]);
+    void DA(int layout1, int layout2, int layout3, int layout4, int layout5, int layout6, int layout7, int layout8);
+    void DisplayAktualisieren(int layout1, int layout2, int layout3, int layout4, int layout5, int layout6, int layout7, int layout8);
     void DT(int x_, int y_, String s_);
     void DisplayText(int x_, int y_, String s_);
     void DR();
     void DisplayRand();
-    void Wait(int delay);
+    void Wait(unsigned int delay);
 
 
   private:
