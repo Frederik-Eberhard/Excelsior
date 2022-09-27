@@ -2,7 +2,7 @@
 #include <Excelsior.h>
 /*#include <Adafruit_GFX.h>  // Include core graphics library for the display
 #include <Adafruit_SSD1306.h>  // Include Adafruit_SSD1306 library to drive the display
-#include <MPU6050_tockn.h>
+//#include <MPU6050_tockn.h>
 #include <Wire.h>
 
 #include <Fonts/FreeMonoBold12pt7b.h>  // Add a custom font
@@ -10,7 +10,7 @@
 */
 
 //------SETUP------------------
-Excelsior::Excelsior() : display(128, 64, &Wire2), mpu6050(Wire2){
+Excelsior::Excelsior() : display(128, 64, &Wire2) , bno055(55,0x28,&Wire2){
   Serial.begin(9600);
   delay(1000);
   Serial.println("Hello Excelsior");
@@ -42,9 +42,12 @@ Excelsior::Excelsior() : display(128, 64, &Wire2), mpu6050(Wire2){
   display.dim(0);  //Set brightness (0 is maximun and 1 is a little dim)
 
   Wire2.begin();
-  DisplayAktualisieren(-1);
-  mpu6050.begin();
-  mpu6050.calcGyroOffsets(true);
+  if(!bno055.begin())
+    DisplayAktualisieren(-2);   //Error message: Gyro not found
+  delay(500);                   //short wait, to initialize the bno055
+  //DisplayAktualisieren(-1);
+  //mpu6050.begin();
+  //mpu6050.calcGyroOffsets(true);
   DisplayAktualisieren(0);
 }
 
@@ -248,10 +251,12 @@ int Excelsior::GyroWert(int axis){
 }
 
 int Excelsior::GyroWert(int axis, bool autoreset){    //0,1,2 --> The returned and displayed Values ;  3,4,5 --> The offset of the actual Value and the desired Value
-  mpu6050.update();
-  int x = mpu6050.getAngleX();           //original Values X
-  int y = mpu6050.getAngleY();           //original Values Y
-  int z = mpu6050.getAngleZ();           //original Values Z
+  sensors_event_t dir;
+  bno055.getEvent(&dir, Adafruit_BNO055::VECTOR_EULER);
+  //mpu6050.update();
+  int x = dir.orientation.x;//mpu6050.getAngleX();           //original Values X
+  int y = dir.orientation.y;//mpu6050.getAngleY();           //original Values Y
+  int z = dir.orientation.z;//mpu6050.getAngleZ();           //original Values Z
 
   if(autoreset){
     _gyroCalls++;
@@ -281,10 +286,13 @@ void Excelsior::GyroReset(int axis){
 }
 
 void Excelsior::GyroReset(int axis, bool toOriginal){          //Resets the Gyroscope Values (if toOriginal --> reverts back to the actual gyroscope Values by setting the offsets to 0)
-  mpu6050.update();
-  int x = mpu6050.getAngleX();           //original Values X
-  int y = mpu6050.getAngleY();           //original Values Y
-  int z = mpu6050.getAngleZ();           //original Values Z
+  sensors_event_t dir;
+  bno055.getEvent(&dir, Adafruit_BNO055::VECTOR_EULER);
+  //mpu6050.update();
+  int x = dir.orientation.x;//mpu6050.getAngleX();           //original Values X
+  int y = dir.orientation.y;//mpu6050.getAngleY();           //original Values Y
+  int z = dir.orientation.z;//mpu6050.getAngleZ();           //original Values Z
+
   switch(axis){
     case GYRO_X:  _sensorValues[_maxSensors + 3] = toOriginal? 0 : x;
                   break;
@@ -454,6 +462,6 @@ void Excelsior::DisplayRand(){
 void Excelsior::Wait(unsigned int delay){      //acts like a regular delay while making sure, that the MPU continues to update to work reliably
   unsigned int current = millis();
   while(millis() - current < delay){
-    mpu6050.update();
+    //mpu6050.update();
   }
 }
