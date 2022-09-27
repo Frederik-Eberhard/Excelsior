@@ -4,7 +4,10 @@
 #include <Arduino.h>
 #include <Adafruit_GFX.h>  // Include core graphics library for the display
 #include <Adafruit_SSD1306.h>  // Include Adafruit_SSD1306 library to drive the display
-#include <MPU6050_tockn.h>
+#include <Adafruit_Sensor.h>  	//Needed for the Adafruit_BNO055 Gyrosensor
+#include <Adafruit_BNO055.h>
+#include <utility/imumaths.h>
+//#include <MPU6050_tockn.h>
 #include <Wire.h>
 
 #include <Fonts/FreeMonoBold12pt7b.h>  // Add a custom font
@@ -36,7 +39,8 @@ class Excelsior
 {
   public:
     Adafruit_SSD1306 display;
-    MPU6050 mpu6050;
+    Adafruit_BNO055 bno055;
+    //MPU6050 mpu6050;
     Excelsior();
     void SensorSetup(int port, int type);
     void LichtVerzoegerung(int delay);
