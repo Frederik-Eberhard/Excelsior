@@ -48,7 +48,7 @@ class Excelsior
     int  SensorWert(int port, int color);
     int  SensorWert(int port, int color, bool percent);
     int  GyroWert(int axis);
-    int  GyroWert(int axis, bool autoreset);
+//    int  GyroWert(int axis, bool autoreset);
     void GyroReset();
     void GyroReset(int axis);
     void GyroReset(int axis, bool toOriginal);
