@@ -13,14 +13,14 @@
 Excelsior::Excelsior() : display(128, 64, &Wire2) , bno055(55,0x28,&Wire2){
   Serial.begin(9600);
   delay(1000);
-  Serial.println("Hello Excelsior");
+  Serial.println("Hello-Excelsior");
 
   for(int i = 0; i < _maxSensors; i++){
     _sensors[i] = -1;                        //initiallises array as empty
   }
-  _sensorValues[_maxSensors + 3] = 0;        //setting the Gyroscope Reset Values
-  _sensorValues[_maxSensors + 4] = 0;
-  _sensorValues[_maxSensors + 5] = 0;
+  //_sensorValues[_maxSensors + 3] = 0;        //setting the Gyroscope offset Values
+  //_sensorValues[_maxSensors + 4] = 0;
+  //_sensorValues[_maxSensors + 5] = -90;
 
   pinMode(_pinout[_sensShift][2], INPUT);     //internal Button
 
@@ -43,11 +43,9 @@ Excelsior::Excelsior() : display(128, 64, &Wire2) , bno055(55,0x28,&Wire2){
 
   Wire2.begin();
   if(!bno055.begin())
-    DisplayAktualisieren(-2);   //Error message: Gyro not found
+    DisplayAktualisieren(-1);   //Error message: Gyro not found
   delay(500);                   //short wait, to initialize the bno055
-  //DisplayAktualisieren(-1);
-  //mpu6050.begin();
-  //mpu6050.calcGyroOffsets(true);
+  GyroReset();
   DisplayAktualisieren(0);
 }
 
@@ -245,31 +243,51 @@ long Excelsior::_LightSensorPercent(int port, int color){
   }
 }
 
-//------MPU 6050------
+//------BNO055------
+void Excelsior::_getOrientation(double *vec){
+  imu::Quaternion quat = bno055.getQuat();
+  quat.normalize();
+  imu::Vector<3> euler = quat.toEuler();
+
+  vec[0] = - euler.x() * 180/M_PI;
+  vec[1] =   euler.y() * 180/M_PI;
+  vec[2] = - euler.z() * 180/M_PI;
+
+  return;
+}
+
 int Excelsior::GyroWert(int axis){
   return GyroWert(axis, false);
 }
 
 int Excelsior::GyroWert(int axis, bool autoreset){    //0,1,2 --> The returned and displayed Values ;  3,4,5 --> The offset of the actual Value and the desired Value
-  sensors_event_t dir;
-  bno055.getEvent(&dir, Adafruit_BNO055::VECTOR_EULER);
-  //mpu6050.update();
-  int x = dir.orientation.x;//mpu6050.getAngleX();           //original Values X
-  int y = dir.orientation.y;//mpu6050.getAngleY();           //original Values Y
-  int z = dir.orientation.z;//mpu6050.getAngleZ();           //original Values Z
+  double orientation[3];
+  _getOrientation(orientation);      //fetches the orientation data of the Gyroscopesensor
 
+  for(int i = 0; i < 3; i++){         //turns the normal range of -180 to +180 to an infinte range for more easy usage of the angles
+    double lastOrientation =  _sensorValues[_maxSensors + i] - _sensorValues[_maxSensors + i + 3];
+    if(lastOrientation - orientation[i] > 200)
+      _sensorValues[_maxSensors + i + 3] += 360;
+    else if(lastOrientation - orientation[i] < -200)
+      _sensorValues[_maxSensors + i + 3] -= 360;
+    _sensorValues[_maxSensors + i] = orientation[i] + _sensorValues[_maxSensors + i + 3];
+  }
+
+  /*
   if(autoreset){
     _gyroCalls++;
     if(_gyroCalls % _gyroresetDelay == 0){
-      if(absolute(x) < _gyroSpan[0] || absolute(x) > _gyroSpan[1]) { GyroReset(GYRO_X); }
-      if(absolute(y) < _gyroSpan[0] || absolute(y) > _gyroSpan[1]) { GyroReset(GYRO_Y); }
-      if(absolute(z) < _gyroSpan[0] || absolute(z) > _gyroSpan[1]) { GyroReset(GYRO_Z); }
+      if(absolute(dir[0]) < _gyroSpan[0] || absolute(dir[0]) > _gyroSpan[1]) { GyroReset(GYRO_X); }
+      if(absolute(dir[1]) < _gyroSpan[0] || absolute(dir[1]) > _gyroSpan[1]) { GyroReset(GYRO_Y); }
+      if(absolute(dir[2]) < _gyroSpan[0] || absolute(dir[2]) > _gyroSpan[1]) { GyroReset(GYRO_Z); }
     }
-  }
+  }*/
 
+  /*
   _sensorValues[_maxSensors + 0] = x - _sensorValues[_maxSensors + 3];
   _sensorValues[_maxSensors + 1] = y - _sensorValues[_maxSensors + 4];
   _sensorValues[_maxSensors + 2] = z - _sensorValues[_maxSensors + 5];
+  */
 
   if(axis >= GYRO_X && axis <= GYRO_Z)                             //looks if axis is between X and Z
     return _sensorValues[_maxSensors + axis - GYRO_X];
@@ -286,33 +304,30 @@ void Excelsior::GyroReset(int axis){
 }
 
 void Excelsior::GyroReset(int axis, bool toOriginal){          //Resets the Gyroscope Values (if toOriginal --> reverts back to the actual gyroscope Values by setting the offsets to 0)
-  sensors_event_t dir;
-  bno055.getEvent(&dir, Adafruit_BNO055::VECTOR_EULER);
-  //mpu6050.update();
-  int x = dir.orientation.x;//mpu6050.getAngleX();           //original Values X
-  int y = dir.orientation.y;//mpu6050.getAngleY();           //original Values Y
-  int z = dir.orientation.z;//mpu6050.getAngleZ();           //original Values Z
+  double orientation[3];
+  _getOrientation(orientation);      //fetches the orientation data of the Gyroscopesensor
 
   switch(axis){
-    case GYRO_X:  _sensorValues[_maxSensors + 3] = toOriginal? 0 : x;
+    case GYRO_X:  _sensorValues[_maxSensors + 3] = toOriginal? 0 : - orientation[0];
                   break;
 
-    case GYRO_Y:  _sensorValues[_maxSensors + 4] = toOriginal? 0 : y;
+    case GYRO_Y:  _sensorValues[_maxSensors + 4] = toOriginal? 0 : - orientation[1];
                   break;
 
-    case GYRO_Z:  _sensorValues[_maxSensors + 5] = toOriginal? 0 : z;
+    case GYRO_Z:  _sensorValues[_maxSensors + 5] = toOriginal? 0 : - orientation[2];
                   break;
 
-    default:      _sensorValues[_maxSensors + 3] = toOriginal? 0 : x;
-                  _sensorValues[_maxSensors + 4] = toOriginal? 0 : y;
-                  _sensorValues[_maxSensors + 5] = toOriginal? 0 : z;
+    default:      _sensorValues[_maxSensors + 3] = toOriginal? 0 : - orientation[0];
+                  _sensorValues[_maxSensors + 4] = toOriginal? 0 : - orientation[1];
+                  _sensorValues[_maxSensors + 5] = toOriginal? 0 : - orientation[2];
                   break;
   }
-  _sensorValues[_maxSensors + 0] = x - _sensorValues[_maxSensors + 3];
-  _sensorValues[_maxSensors + 1] = y - _sensorValues[_maxSensors + 4];
-  _sensorValues[_maxSensors + 2] = z - _sensorValues[_maxSensors + 5];
-}
 
+  for(int i = 0; i < 3; i++){
+    _sensorValues[_maxSensors + i] = orientation[i] + _sensorValues[_maxSensors + i + 3];
+  }
+}
+/*
 void Excelsior::GyroVerzoegerung(int delay){
   _gyroresetDelay = delay;
 }
@@ -321,7 +336,7 @@ void Excelsior::GyroResetSpann(int a, int b){
   _gyroSpan[0] = a;
   _gyroSpan[1] = b;
 }
-
+*/
 
 //------OLED DISPLAY------------------
 void Excelsior::DA(){
@@ -348,7 +363,7 @@ void Excelsior::DA(int type){
 void Excelsior::DisplayAktualisieren(int type){     //definiert presets
   int layout[8];
   switch(type){
-    case -1:                    //shows bootup
+    case -1:                    //shows Gyroscope Error
       layout[0] = -1; break;
     case 2:                     //shows custom text
       layout[0] = -2; break;
@@ -393,7 +408,7 @@ void Excelsior::DisplayAktualisieren(int (&layout)[8]){          //array of leng
   if(layout[0] == -1){                                           //-1 at the first index cause the bootup screen
     display.setTextSize(1);
     display.setCursor(0,10);
-    display.println("  Programm \n startet in \n 6 Sekunden");
+    display.println("  Gyrosensor \n nicht \n gefunden!");
 
   }else if(layout[1] < -2){                                       //negative numbers at the second index enables custom text
     display.setTextSize(0);
@@ -426,7 +441,7 @@ void Excelsior::DisplayAktualisieren(int (&layout)[8]){          //array of leng
         display.setCursor(positionValueX, positionY);
         display.println(_motorSpeeds[layout[i] - MOTOR_A]);
 
-      }else if(layout[i] >= GYRO_X && layout[i] <= GYRO_Y){      //if the Gyroscope is displayed
+      }else if(layout[i] >= GYRO_X && layout[i] <= GYRO_Z){      //if the Gyroscope is displayed
         display.println(char('X' + layout[i] - GYRO_X));
         display.setCursor(positionValueX, positionY);
         display.println(_sensorValues[_maxSensors + layout[i] - GYRO_X]);
