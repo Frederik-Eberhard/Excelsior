@@ -256,11 +256,7 @@ void Excelsior::_getOrientation(double *vec){
   return;
 }
 
-int Excelsior::GyroWert(int axis){
-  return GyroWert(axis, false);
-}
-
-int Excelsior::GyroWert(int axis, bool autoreset){    //0,1,2 --> The returned and displayed Values ;  3,4,5 --> The offset of the actual Value and the desired Value
+int Excelsior::GyroWert(int axis){    //0,1,2 --> The returned and displayed Values ;  3,4,5 --> The offset of the actual Value and the desired Value
   double orientation[3];
   _getOrientation(orientation);      //fetches the orientation data of the Gyroscopesensor
 
