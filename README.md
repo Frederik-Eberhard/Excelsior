@@ -39,3 +39,9 @@ Arduino Library to enable easy use of the Excelsior-Brick.
 - Refurbished the way that the Matrix on the Display is generated
 - Custom order of the sensors and motors now able to be displayed in the Matrix-View
 - Small Bug-Fixes to the pinout 
+### Version 1.1.4
+- Preparation for the Switch to BNO055
+### Version 1.1.5
+- MPU 6050 no longer supported, full switch to BNO055
+- Rotations are now no longer limited to a range from 0 - 360°. This removes unwanted jumps in orientation readings and enables a simpler approach to many use cases
+- Autoreset is no longer an option, it can still be done manually
