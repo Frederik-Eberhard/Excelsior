@@ -2,12 +2,11 @@
 #define Excelsior_h
 
 #include <Arduino.h>
-#include <Adafruit_GFX.h>  // Include core graphics library for the display
-#include <Adafruit_SSD1306.h>  // Include Adafruit_SSD1306 library to drive the display
-#include <Adafruit_Sensor.h>  	//Needed for the Adafruit_BNO055 Gyrosensor
-#include <Adafruit_BNO055.h>
+#include <Adafruit_GFX.h>       // Include core graphics library for the display
+#include <Adafruit_SSD1306.h>   // Include Adafruit_SSD1306 library to drive the display
+#include <Adafruit_Sensor.h>  	// Needed for the Adafruit_BNO055 Gyrosensor
+#include <Adafruit_BNO055.h>    // Needed for the Adafruit_BNO055 Gyrosensor
 #include <utility/imumaths.h>
-//#include <MPU6050_tockn.h>
 #include <Wire.h>
 
 #include <Fonts/FreeMonoBold12pt7b.h>  // Add a custom font
@@ -40,7 +39,6 @@ class Excelsior
   public:
     Adafruit_SSD1306 display;
     Adafruit_BNO055 bno055;
-    //MPU6050 mpu6050;
     Excelsior();
     void SensorSetup(int port, int type);
     void LichtVerzoegerung(int delay);
@@ -54,8 +52,8 @@ class Excelsior
     void GyroReset();
     void GyroReset(int axis);
     void GyroReset(int axis, bool toOriginal);
-    void GyroVerzoegerung(int delay);
-    void GyroResetSpann(int a, int b);
+//    void GyroVerzoegerung(int delay);
+//    void GyroResetSpann(int a, int b);
     void DisplayAktualisieren();
     void DA();
     void DA(int type);
@@ -74,7 +72,7 @@ class Excelsior
   private:
     int  _LightSensorValue(int port, int color);
     long _LightSensorPercent(int port, int color);
-
+    void _getOrientation(double *vec);
     //Teensy 4.1 Pinout
 
     const int _pinout[13][4] =  {{ 7, 6, 2}       //---Motors        (3x PWM)
@@ -90,24 +88,19 @@ class Excelsior
                                 ,{50,48,51,40}    //6      |
                                 ,{49,26,27,39}    //7      |
                                 ,{17,18,19,16}};  //8---Open I2C      (SDA1,SDA,SCL,SCL1)
-    //Tennsy 3.2 Pinout
-    /*
-    const int _pinout[3][4]={{ 3, 4, 5},
-                             {29,30,32},
-                             {25,26,27,28}};
-    */
+
     static const int _sensShift = 4;//1;                        //number needed to be added to port for mapping to the pinout
     static const int _maxSensors = 8;//1;
     static const int _maxMotors = 4;//1;
     static const int _DisplayX  = 10;
     static const int _DisplayY  =  4;
     int _lightDelay = 1;                                  //not realy neccessary to have a higher number, as even 1 millisecond doesnt reduce the quality of the brightnesvalue
-    int _gyroresetDelay = 100;
-    int _gyroCalls = 0;
-    int _gyroSpan[2] = {10, 200};                         //a Span, where if gyroValues fall inside of it, they wont get reset by autoreset
+    //int _gyroresetDelay = 100;
+    //int _gyroCalls = 0;
+    //int _gyroSpan[2] = {10, 200};                         //a Span, where if gyroValues fall inside of it, they wont get reset by autoreset
 
     int _sensors[_maxSensors];                            //stores the type of a sensor and if it hasn't been initialized it will be -1
-    int _sensorValues[_maxSensors + 7];                   //stores the values of all sensors, the used gyroscope values the gyroscope reset values and the button
+    int _sensorValues[_maxSensors + 7];                   //stores the values of all sensors, the used gyroscope values the gyroscope offset values and the button
     int _motorSpeeds[_maxMotors];                         //stores the speed / direction of each motor
 
     String _Display[_DisplayX][_DisplayY];                //stores what is supposed to be shown on the display
