@@ -71,11 +71,11 @@ void Excelsior::LichtVerzoegerung(int delay){
 }
 //------DRIVING MOTORS------
 void Excelsior::Motor(int port, int dir){
-  if(port > 0 && port <= _maxMotors && dir > -256 && dir < 256){
-  _motorSpeeds[port - 1] = dir;
-  digitalWrite(_pinout[port - 1][0], dir < 0? HIGH:LOW);   //if dir == 0, then both go LOW (motor off)
-  digitalWrite(_pinout[port - 1][1], dir > 0? HIGH:LOW);   //else if dir determines direction of rotation
-  analogWrite (_pinout[port - 1][2], abs(dir));            //takes the absolute value to determine rotation speed
+  if(port >= MOTOR_A && port < (MOTOR_A + _maxMotors) && dir > -256 && dir < 256){
+  _motorSpeeds[port - MOTOR_A] = dir;
+  digitalWrite(_pinout[port - MOTOR_A][0], dir < 0? HIGH:LOW);   //if dir == 0, then both go LOW (motor off)
+  digitalWrite(_pinout[port - MOTOR_A][1], dir > 0? HIGH:LOW);   //else if dir determines direction of rotation
+  analogWrite (_pinout[port - MOTOR_A][2], abs(dir));            //takes the absolute value to determine rotation speed
   }else{
     Serial.println((String)"Der Motoranschluss " + port + " oder die Geschwindigkeit " + dir + " ist außerhalb des vorgegebenen Intervalls");
   }
