@@ -45,3 +45,5 @@ Arduino Library to enable easy use of the Excelsior-Brick.
 - MPU 6050 no longer supported, full switch to BNO055
 - Rotations are now no longer limited to a range from 0 - 360°. This removes unwanted jumps in orientation readings and enables a simpler approach to many use cases
 - Autoreset is no longer an option, it can still be done manually
+### Version 1.1.6
+- Small Bug Fix
