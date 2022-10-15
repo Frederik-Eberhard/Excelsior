@@ -47,3 +47,8 @@ Arduino Library to enable easy use of the Excelsior-Brick.
 - Autoreset is no longer an option, it can still be done manually
 ### Version 1.1.6
 - Small Bug Fix
+### Version 1.1.7
+- Added a new way to display Error Messages
+  - If an Error occurs, a Message appears on the Display saying what went wrong
+  - After the Error Message appeared, a warning triangle stays in the top right corner of the Display as a Warning
+- Removed function Wait() since no longer necessary with the new Gyro
