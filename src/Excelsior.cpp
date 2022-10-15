@@ -1,14 +1,7 @@
 #include <Arduino.h>
 #include <Excelsior.h>
-/*#include <Adafruit_GFX.h>  // Include core graphics library for the display
-#include <Adafruit_SSD1306.h>  // Include Adafruit_SSD1306 library to drive the display
-//#include <MPU6050_tockn.h>
-#include <Wire.h>
 
-#include <Fonts/FreeMonoBold12pt7b.h>  // Add a custom font
-#include <Fonts/FreeMono9pt7b.h>  // Add a custom font
-*/
-
+using namespace std;
 //------SETUP------------------
 Excelsior::Excelsior() : display(128, 64, &Wire2) , bno055(55,0x28,&Wire2){
   Serial.begin(9600);
@@ -18,9 +11,6 @@ Excelsior::Excelsior() : display(128, 64, &Wire2) , bno055(55,0x28,&Wire2){
   for(int i = 0; i < _maxSensors; i++){
     _sensors[i] = -1;                        //initiallises array as empty
   }
-  //_sensorValues[_maxSensors + 3] = 0;        //setting the Gyroscope offset Values
-  //_sensorValues[_maxSensors + 4] = 0;
-  //_sensorValues[_maxSensors + 5] = -90;
 
   pinMode(_pinout[_sensShift][2], INPUT);     //internal Button
 
@@ -42,16 +32,21 @@ Excelsior::Excelsior() : display(128, 64, &Wire2) , bno055(55,0x28,&Wire2){
   display.dim(0);  //Set brightness (0 is maximun and 1 is a little dim)
 
   Wire2.begin();
-  if(!bno055.begin())
-    DisplayAktualisieren(-1);   //Error message: Gyro not found
-  delay(500);                   //short wait, to initialize the bno055
+  if(!bno055.begin()){
+    _DisplayError(-1,0);        //Error message: Gyro not found
+  }
+  delay(100);                   //short wait, to initialize the bno055
   GyroReset();
-  DisplayAktualisieren(0);
+  DisplayAktualisieren(-1);     //Shows empty display
 }
 
 //------SENSOR SETUP------------------
 void Excelsior::SensorSetup(int port, int type){           //Digital- / Analog-Ports
-  if(type >= LICHT && type <= INFRAROT && port > 0 && port <= _maxSensors){
+  if(port < 1 || port > _maxSensors){
+    _DisplayError(-2,port);      //ERROR: SensorPORT not defined
+  }else if(type < LICHT || type > INFRAROT){
+    _DisplayError(-3,type);      //ERROR: SensorTYPE not defined
+  }else{
       _sensors[port - 1] = type;                                                                                            //LIGHT       LIGHT_NXT       TOUCH_NXT       TOUCH_EV3      INFRAROT      KABLECOLOR  (GREEN -> 5V | RED -> GND)
       pinMode(_pinout[_sensShift + port][0],(type == TAST_EV3 || type == INFRAROT)? INPUT:OUTPUT);               //Red         NULL            NULL            Signal         Signal        BLUE
       pinMode(_pinout[_sensShift + port][1],OUTPUT);                                                             //Green       Led             NULL            NULL                         YELLOW
@@ -61,8 +56,6 @@ void Excelsior::SensorSetup(int port, int type){           //Digital- / Analog-P
       digitalWrite(_pinout[_sensShift + port][0],LOW);         //if defined as INPUT, this disables the internal pullup resistor
       digitalWrite(_pinout[_sensShift + port][1],LOW);
       digitalWrite(_pinout[_sensShift + port][2],LOW);
-  }else{
-    Serial.println((String) "Sensorart " + type + " oder Anschluss " + port + " ist nicht definiert");
   }
 }
 
@@ -71,13 +64,15 @@ void Excelsior::LichtVerzoegerung(int delay){
 }
 //------DRIVING MOTORS------
 void Excelsior::Motor(int port, int dir){
-  if(port >= MOTOR_A && port < (MOTOR_A + _maxMotors) && dir > -256 && dir < 256){
-  _motorSpeeds[port - MOTOR_A] = dir;
-  digitalWrite(_pinout[port - MOTOR_A][0], dir < 0? HIGH:LOW);   //if dir == 0, then both go LOW (motor off)
-  digitalWrite(_pinout[port - MOTOR_A][1], dir > 0? HIGH:LOW);   //else if dir determines direction of rotation
-  analogWrite (_pinout[port - MOTOR_A][2], abs(dir));            //takes the absolute value to determine rotation speed
+  if(port < MOTOR_A || port >= (MOTOR_A + _maxMotors)){
+    _DisplayError(-2,port);      //ERROR: SensorTYPE not defined
+  }else if(dir < -255 || dir > 255){
+    _DisplayError(-4,dir);      //ERROR: Speed not defined
   }else{
-    Serial.println((String)"Der Motoranschluss " + port + " oder die Geschwindigkeit " + dir + " ist außerhalb des vorgegebenen Intervalls");
+    _motorSpeeds[port - MOTOR_A] = dir;
+    digitalWrite(_pinout[port - MOTOR_A][0], dir < 0? HIGH:LOW);   //if dir == 0, then both go LOW (motor off)
+    digitalWrite(_pinout[port - MOTOR_A][1], dir > 0? HIGH:LOW);   //else if dir determines direction of rotation
+    analogWrite (_pinout[port - MOTOR_A][2], abs(dir));            //takes the absolute value to determine rotation speed
   }
 }
 
@@ -89,7 +84,10 @@ bool Excelsior::Knopf(){
 }
 
 int Excelsior::SensorWert(int port){
-  if(port > 0 && port <= _maxSensors){       //looks if the desired port is part of the possible ports
+  if(port < 1 || port > _maxSensors){            //looks if the given port is not part of the possible ports
+    _DisplayError(-2,port);                      //ERROR: SensorPORT not defined
+  }
+  else{
     if(_sensors[port - 1] == TAST_EV3){
       _sensorValues[port - 1] =  map(digitalRead(_pinout[_sensShift + port][0]),0,2,1,0);       //0 and 1 have to be flipped because of different sensor funciton compared to the TOUCH_NXT
       return _sensorValues[port - 1];
@@ -102,14 +100,14 @@ int Excelsior::SensorWert(int port){
       return _sensorValues[port - 1];
     }
     return SensorWert(port, AUS);
-  }else{
-    Serial.println((String)"Der Sensoranschluss " + port + " ist außerhalb des vorgegebenen Intervalls");
-    return -1;
   }
+  return -1;
 }
 
 int Excelsior::SensorWert(int port, int color){
-  if(port > 0 && port <= _maxSensors){
+  if(port < 1 || port > _maxSensors){            //looks if the given port is not part of the possible ports
+    _DisplayError(-2,port);                      //ERROR: SensorPORT not defined
+  }else{
     if(_sensors[port - 1] == LICHT_NXT){
       if(color)
         digitalWrite(_pinout[_sensShift + port][1], HIGH);
@@ -119,14 +117,14 @@ int Excelsior::SensorWert(int port, int color){
       return _sensorValues[port - 1];
     }
     return SensorWert(port, color, false);
-  }else{
-    Serial.println((String)"Der Sensoranschluss " + port + " ist außerhalb des vorgegebenen Intervalls");
-    return -1;
   }
+  return -1;
 }
 
 int Excelsior::SensorWert(int port, int color, bool percent){
-  if(port > 0 && port <= _maxSensors){
+  if(port < 1 || port > _maxSensors){            //looks if the given port is not part of the possible ports
+    _DisplayError(-2,port);                      //ERROR: SensorPORT not defined
+  }else{
     if(_sensors[port - 1] == LICHT){
       _sensorValues[port - 1] = percent? _LightSensorPercent(port,color) : _LightSensorValue(port,color);
       return _sensorValues[port - 1];
@@ -134,12 +132,9 @@ int Excelsior::SensorWert(int port, int color, bool percent){
       _sensorValues[port - 1] = percent? map(SensorWert(port,color),0,1024,0,100) : SensorWert(port,color);
       return _sensorValues[port - 1];
     }
-    Serial.println((String) "Sensorart " + port + " ist nicht definiert oder kann die Parameter nicht erfüllen");
-    return -1;
-  }else{
-    Serial.println((String)"Der Sensoranschluss " + port + " ist außerhalb des vorgegebenen Intervalls");
     return -1;
   }
+  return -1;
 }
 
 int Excelsior::_LightSensorValue(int port, int color){             //gets the "raw" sensor-value
@@ -192,7 +187,7 @@ int Excelsior::_LightSensorValue(int port, int color){             //gets the "r
       digitalWrite(_pinout[_sensShift + port][2], LOW);
       delay(_lightDelay);
       return (1024 - analogRead(_pinout[_sensShift + port][3]));
-    default: Serial.println((String) "Farbe " + color + " ist nicht definiert");   return -1;
+    default: _DisplayError(-6,color); return -1;
   }
 }
 
@@ -239,7 +234,7 @@ long Excelsior::_LightSensorPercent(int port, int color){
       _yellow   = _LightSensorValue(port,GELB);
       _LightSensorValue(port,AUS);                 //turns of the light, so that it doesn't interfere with neighbouring sensors
       return   _yellow * 100L / (_cyan + _magenta + _yellow);
-    default: Serial.println((String) "Farbe " + color + " ist nicht definiert");   return -1;
+    default: _DisplayError(-6,color); return -1;
   }
 }
 
@@ -269,25 +264,9 @@ int Excelsior::GyroWert(int axis){    //0,1,2 --> The returned and displayed Val
     _sensorValues[_maxSensors + i] = orientation[i] + _sensorValues[_maxSensors + i + 3];
   }
 
-  /*
-  if(autoreset){
-    _gyroCalls++;
-    if(_gyroCalls % _gyroresetDelay == 0){
-      if(absolute(dir[0]) < _gyroSpan[0] || absolute(dir[0]) > _gyroSpan[1]) { GyroReset(GYRO_X); }
-      if(absolute(dir[1]) < _gyroSpan[0] || absolute(dir[1]) > _gyroSpan[1]) { GyroReset(GYRO_Y); }
-      if(absolute(dir[2]) < _gyroSpan[0] || absolute(dir[2]) > _gyroSpan[1]) { GyroReset(GYRO_Z); }
-    }
-  }*/
-
-  /*
-  _sensorValues[_maxSensors + 0] = x - _sensorValues[_maxSensors + 3];
-  _sensorValues[_maxSensors + 1] = y - _sensorValues[_maxSensors + 4];
-  _sensorValues[_maxSensors + 2] = z - _sensorValues[_maxSensors + 5];
-  */
-
   if(axis >= GYRO_X && axis <= GYRO_Z)                             //looks if axis is between X and Z
     return _sensorValues[_maxSensors + axis - GYRO_X];
-  Serial.println((String)"Die Gyroskopachse " + axis + " ist nicht definiert");
+  _DisplayError(-7,axis);
   return -1;
 }
 
@@ -323,18 +302,32 @@ void Excelsior::GyroReset(int axis, bool toOriginal){          //Resets the Gyro
     _sensorValues[_maxSensors + i] = orientation[i] + _sensorValues[_maxSensors + i + 3];
   }
 }
-/*
-void Excelsior::GyroVerzoegerung(int delay){
-  _gyroresetDelay = delay;
-}
-
-void Excelsior::GyroResetSpann(int a, int b){
-  _gyroSpan[0] = a;
-  _gyroSpan[1] = b;
-}
-*/
 
 //------OLED DISPLAY------------------
+void Excelsior::_DisplayError(int error){
+  _DisplayError(error,0);
+}
+void Excelsior::_DisplayError(int error, int input){
+  vector<int> v{input};
+  _DisplayError(error,v);
+}
+void Excelsior::_DisplayError(int error, vector<int>& variables){
+  String errorMessage = "";
+  int layout[8];
+  switch(error){
+    case -1:  errorMessage = (String) "Gyrosensor \n   nicht \n gefunden!"; break;
+    case -2:  errorMessage = (String) "Sensorport \n " + variables.at(0) + " nicht \n definiert"; break;
+    case -3:  errorMessage = (String) " Sensorart \n " + variables.at(0) + " nicht \n definiert"; break;
+    case -4:  errorMessage = (String) " Motorport \n " + variables.at(0) + " nicht \n definiert"; break;
+    case -5:  errorMessage = (String) "Geschwin-\ndigkeit " + variables.at(0) + "\nundefiniert"; break;
+    case -6:  errorMessage = (String) "Lichtfarbe\n " + variables.at(0) + " nicht \n definiert"; break;
+    case -7:  errorMessage = (String) "Gyro-Achse\n " + variables.at(0) + " nicht \n definiert"; break;
+    case -8:  errorMessage = (String) "DisplayX/Y\n (" + variables.at(0) + "," + variables.at(1) + ")\nundefiniert"; break;
+    default:  errorMessage = (String) "   Nicht\ndefinierter\n   Fehler"; break;
+  }
+  DisplayAktualisieren(layout,errorMessage);
+}
+
 void Excelsior::DA(){
   DisplayAktualisieren(0);
 }
@@ -349,7 +342,7 @@ void Excelsior::DA(int layout1, int layout2, int layout3, int layout4, int layou
 
 void Excelsior::DisplayAktualisieren(int layout1, int layout2, int layout3, int layout4, int layout5, int layout6, int layout7, int layout8){
   int layout[] =  {layout1,layout2,layout3,layout4,layout5,layout6,layout7,layout8};
-  DisplayAktualisieren(layout);
+  DisplayAktualisieren(layout, "");
 }
 
 void Excelsior::DA(int type){
@@ -359,11 +352,7 @@ void Excelsior::DA(int type){
 void Excelsior::DisplayAktualisieren(int type){     //definiert presets
   int layout[8];
   switch(type){
-    case -1:                    //shows Gyroscope Error
-      layout[0] = -1; break;
-    case 2:                     //shows custom text
-      layout[0] = -2; break;
-    case 0:                     //shows all sensors
+    case 0:                         //shows all sensors
       layout[0] = 1;
       layout[1] = 2;
       layout[2] = 3;
@@ -373,7 +362,7 @@ void Excelsior::DisplayAktualisieren(int type){     //definiert presets
       layout[6] = 7;
       layout[7] = 8;
       break;
-    case 1:                     //shows all motors and gyroscopes
+    case 1:                         //shows all motors and gyroscopes
       layout[0] = MOTOR_A;
       layout[1] = MOTOR_B;
       layout[2] = MOTOR_C;
@@ -383,30 +372,33 @@ void Excelsior::DisplayAktualisieren(int type){     //definiert presets
       layout[6] = GYRO_Z;
       layout[7] = 0;                //last entry is not displayed
       break;
+    case 2:                         //shows custom text
+      layout[0] = -1; break;
+
     default:                        //default displays NOTHING
       for(int i = 0; i < 8; i++){
         layout[i] = 0;
       }
       break;
   }
-  DisplayAktualisieren(layout);
+  DisplayAktualisieren(layout, "");
 }
 
-
-void Excelsior::DA(int (&layout)[8]){
-  DisplayAktualisieren(layout);
+void Excelsior::DA(int (&layout)[8], String errorMessage){
+  DisplayAktualisieren(layout,errorMessage);
 }
 
-void Excelsior::DisplayAktualisieren(int (&layout)[8]){          //array of length 8 that determines the order of displayed entries (only takes arrays of this length)
+void Excelsior::DisplayAktualisieren(int (&layout)[8], String errorMessage){          //array of length 8 that determines the order of displayed entries (only takes arrays of this length)
   display.clearDisplay();                                        // Clear the display so we can refresh
   display.setFont(&FreeMono9pt7b);                               // Set a custom font
 
-  if(layout[0] == -1){                                           //-1 at the first index cause the bootup screen
-    display.setTextSize(1);
+  if(errorMessage != ""){                                        //Display Error Message if errorMessage exists
+    _errorTriangle = true;
+    display.setTextSize(0);
     display.setCursor(0,10);
-    display.println("  Gyrosensor \n nicht \n gefunden!");
+    display.println(errorMessage);
 
-  }else if(layout[1] < -2){                                       //negative numbers at the second index enables custom text
+  }else if(layout[0] == -1){                                      //-1 at the first index enables custom text
     display.setTextSize(0);
     for(int y = 0; y < _DisplayY; y++){
       for(int x = 0; x < _DisplayX; x++){
@@ -447,7 +439,16 @@ void Excelsior::DisplayAktualisieren(int (&layout)[8]){          //array of leng
   if(_displayOutline){                                           //displays a outline to show if the button is pressed
     display.drawRect(0, 0, 128, 64, WHITE);
   }
+  if(_errorTriangle){                                            //displays an error-simbol in the top right corner of the display to indicate, that an errorMessagehas been shown
+    display.setFont(&FreeMonoBold9pt7b);
+    display.setTextSize(0);
+    display.drawTriangle(127,14,113,14,120,0,WHITE);
+    display.setCursor(115,12);
+    display.println("!");
+  }
   display.display();                                             // Print everything we set previously
+  if(errorMessage != "")
+    delay(1000);        //shows the error Message for longer
 }
 
 void Excelsior::DT(int x_, int y_, String s_){
@@ -458,7 +459,8 @@ void Excelsior::DisplayText(int x_, int y_, String s_){
   if(x_ >= 0 && x_ < _DisplayX && y_ >= 0 && y_ < _DisplayY){
     _Display[x_][y_] = s_;
   }else{
-    Serial.println((String)"Die Display-Position " + x_ + "  " + y_ + " ist nicht definiert");
+    vector<int> v{x_,y_};
+    _DisplayError(-8,v);
   }
 }
 
@@ -468,11 +470,4 @@ void Excelsior::DR(){
 
 void Excelsior::DisplayRand(){
     _displayOutline = !_displayOutline;
-}
-
-void Excelsior::Wait(unsigned int delay){      //acts like a regular delay while making sure, that the MPU continues to update to work reliably
-  unsigned int current = millis();
-  while(millis() - current < delay){
-    //mpu6050.update();
-  }
 }
