@@ -52,3 +52,7 @@ Arduino Library to enable easy use of the Excelsior-Brick.
   - If an Error occurs, a Message appears on the Display saying what went wrong
   - After the Error Message appeared, a warning triangle stays in the top right corner of the Display as a Warning
 - Removed function Wait() since no longer necessary with the new Gyro
+### Version 1.1.8
+- Added "Excelsior" as default thing to be displayed, if nothing else is defined
+- With a DisplayAktualisieren(3), nothing is displayed
+- Fixed Bug with C++ Vector
