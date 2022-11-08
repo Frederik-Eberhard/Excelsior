@@ -2,7 +2,7 @@
 #define Excelsior_h
 
 #include <Arduino.h>
-#include <Vector>
+#include <Array.h>              // Used for dynamic length array, as in the error messages
 #include <Adafruit_GFX.h>       // Include core graphics library for the display
 #include <Adafruit_SSD1306.h>   // Include Adafruit_SSD1306 library to drive the display
 #include <Adafruit_Sensor.h>  	// Needed for the Adafruit_BNO055 Gyrosensor
@@ -36,6 +36,8 @@ using namespace std;
 #define GYRO_X      17
 #define GYRO_Y      18
 #define GYRO_Z      19
+
+typedef Array<int,10> _VecInt10;                      //datatype similar to c++ vector with a maximum of 10 indecies
 
 class Excelsior
 {
@@ -73,7 +75,7 @@ class Excelsior
     void _getOrientation(double *vec);
     void _DisplayError(int error);
     void _DisplayError(int error, int input);
-    void _DisplayError(int error, vector<int>& variables);
+    void _DisplayError(int error, _VecInt10 & variables);
     //Teensy 4.1 Pinout
 
     const int _pinout[13][4] =  {{ 7, 6, 2}       //---Motors        (3x PWM)
@@ -105,7 +107,10 @@ class Excelsior
     String _Display[_DisplayX][_DisplayY];                //stores what is supposed to be shown on the display
     bool _displayOutline = false;                         //stores if the display-Outline is supposed to be displayed
     bool _errorTriangle = false;                          //stores if the error-Triangle is supposed to be displayed
+    _VecInt10 _errorVariables;
+
 };
+
 
 template<typename type> type absolute(type v){
   if(v < 0)

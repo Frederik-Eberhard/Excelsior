@@ -308,23 +308,24 @@ void Excelsior::_DisplayError(int error){
   _DisplayError(error,0);
 }
 void Excelsior::_DisplayError(int error, int input){
-  vector<int> v{input};
-  _DisplayError(error,v);
+  _errorVariables.push_back(input);
+  _DisplayError(error,_errorVariables);
 }
-void Excelsior::_DisplayError(int error, vector<int>& variables){
+void Excelsior::_DisplayError(int error, _VecInt10 & variables){
   String errorMessage = "";
   int layout[8];
   switch(error){
     case -1:  errorMessage = (String) "Gyrosensor \n   nicht \n gefunden!"; break;
-    case -2:  errorMessage = (String) "Sensorport \n " + variables.at(0) + " nicht \n definiert"; break;
-    case -3:  errorMessage = (String) " Sensorart \n " + variables.at(0) + " nicht \n definiert"; break;
-    case -4:  errorMessage = (String) " Motorport \n " + variables.at(0) + " nicht \n definiert"; break;
-    case -5:  errorMessage = (String) "Geschwin-\ndigkeit " + variables.at(0) + "\nundefiniert"; break;
-    case -6:  errorMessage = (String) "Lichtfarbe\n " + variables.at(0) + " nicht \n definiert"; break;
-    case -7:  errorMessage = (String) "Gyro-Achse\n " + variables.at(0) + " nicht \n definiert"; break;
-    case -8:  errorMessage = (String) "DisplayX/Y\n (" + variables.at(0) + "," + variables.at(1) + ")\nundefiniert"; break;
+    case -2:  errorMessage = (String) "Sensorport \n " + variables[0] + " nicht \n definiert"; break;
+    case -3:  errorMessage = (String) " Sensorart \n " + variables[0] + " nicht \n definiert"; break;
+    case -4:  errorMessage = (String) " Motorport \n " + variables[0] + " nicht \n definiert"; break;
+    case -5:  errorMessage = (String) "Geschwin-\ndigkeit " + variables[0] + "\nundefiniert"; break;
+    case -6:  errorMessage = (String) "Lichtfarbe\n " + variables[0] + " nicht \n definiert"; break;
+    case -7:  errorMessage = (String) "Gyro-Achse\n " + variables[0] + " nicht \n definiert"; break;
+    case -8:  errorMessage = (String) "DisplayX/Y\n (" + variables[0] + "," + variables[1] + ")\nundefiniert"; break;
     default:  errorMessage = (String) "   Nicht\ndefinierter\n   Fehler"; break;
   }
+  _errorVariables.clear();
   DisplayAktualisieren(layout,errorMessage);
 }
 
@@ -373,13 +374,16 @@ void Excelsior::DisplayAktualisieren(int type){     //definiert presets
       layout[7] = 0;                //last entry is not displayed
       break;
     case 2:                         //shows custom text
-      layout[0] = -1; break;
+      layout[0] = -2; break;
 
-    default:                        //default displays NOTHING
+    case 3:                         //displays NOTHING
       for(int i = 0; i < 8; i++){
         layout[i] = 0;
       }
       break;
+
+    default:                        //default displays "Excelsior"
+      layout[0] = -1;      break;
   }
   DisplayAktualisieren(layout, "");
 }
@@ -398,7 +402,12 @@ void Excelsior::DisplayAktualisieren(int (&layout)[8], String errorMessage){    
     display.setCursor(0,10);
     display.println(errorMessage);
 
-  }else if(layout[0] == -1){                                      //-1 at the first index enables custom text
+  }else if(layout[0] == -1){                                     //-1 at the first index displays default text
+    display.setTextSize(0);
+    display.setCursor(15,35);
+    display.println("Excelsior");
+
+  }else if(layout[0] == -2){                                     //-2 at the first index enables custom text
     display.setTextSize(0);
     for(int y = 0; y < _DisplayY; y++){
       for(int x = 0; x < _DisplayX; x++){
@@ -406,7 +415,7 @@ void Excelsior::DisplayAktualisieren(int (&layout)[8], String errorMessage){    
         display.println(_Display[x][y]);
       }
     }
-
+  
   }else{
     for(int i = 0; i < 8; i++){                                  //shows all sensorvalues -> if less then 8 ports, then the last three are the gyroscope values
       if(layout[i] == 0)
@@ -459,8 +468,9 @@ void Excelsior::DisplayText(int x_, int y_, String s_){
   if(x_ >= 0 && x_ < _DisplayX && y_ >= 0 && y_ < _DisplayY){
     _Display[x_][y_] = s_;
   }else{
-    vector<int> v{x_,y_};
-    _DisplayError(-8,v);
+    _errorVariables.push_back(x_);
+    _errorVariables.push_back(y_);
+    _DisplayError(-8,_errorVariables);
   }
 }
 
