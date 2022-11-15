@@ -65,9 +65,9 @@ void Excelsior::LichtVerzoegerung(int delay){
 //------DRIVING MOTORS------
 void Excelsior::Motor(int port, int dir){
   if(port < MOTOR_A || port >= (MOTOR_A + _maxMotors)){
-    _DisplayError(-2,port);      //ERROR: SensorTYPE not defined
+    _DisplayError(-4,port);     //ERROR: MotorPORT not defined
   }else if(dir < -255 || dir > 255){
-    _DisplayError(-4,dir);      //ERROR: Speed not defined
+    _DisplayError(-5,dir);      //ERROR: Speed not defined
   }else{
     _motorSpeeds[port - MOTOR_A] = dir;
     digitalWrite(_pinout[port - MOTOR_A][0], dir < 0? HIGH:LOW);   //if dir == 0, then both go LOW (motor off)
@@ -433,7 +433,7 @@ void Excelsior::DisplayAktualisieren(int (&layout)[8], String errorMessage){    
         display.setCursor(positionValueX, positionY);
         display.println(_sensorValues[layout[i] - 1]);          //corrects the of by one input
 
-      }else if(layout[i] >= MOTOR_A && layout[i] <= MOTOR_D){    //if the Motors are displayed
+      }else if(layout[i] >= MOTOR_A && layout[i] < MOTOR_A + _maxMotors){    //if the Motors are displayed
         display.println(char('A' + layout[i] - MOTOR_A));
         display.setCursor(positionValueX, positionY);
         display.println(_motorSpeeds[layout[i] - MOTOR_A]);

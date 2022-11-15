@@ -29,10 +29,10 @@ using namespace std;
 #define TAST_NXT    10
 #define TAST_EV3    11
 #define INFRAROT    12
-#define MOTOR_A     13
-#define MOTOR_B     14
-#define MOTOR_C     15
-#define MOTOR_D     16
+#define MOTOR_A     1
+#define MOTOR_B     2
+#define MOTOR_C     3
+#define MOTOR_D     4
 #define GYRO_X      17
 #define GYRO_Y      18
 #define GYRO_Z      19
@@ -87,14 +87,14 @@ class Excelsior
                                 ,{36,37,38,22}    //2      |
                                 ,{33,34,35,21}    //3      |
                                 ,{32,31,30,20}    //4      |
-                                ,{52,54,53,41}    //5      |
-                                ,{50,48,51,40}    //6      |
-                                ,{49,26,27,39}    //7      |
+                                ,{48,50,49,41}    //5      |
+                                ,{53,54,52,40}    //6      |
+                                ,{27,26,51,39}    //7      |
                                 ,{17,18,19,16}};  //8---Open I2C      (SDA1,SDA,SCL,SCL1)
 
-    static const int _sensShift = 4;//1;                        //number needed to be added to port for mapping to the pinout
-    static const int _maxSensors = 8;//1;
-    static const int _maxMotors = 4;//1;
+    static const int _sensShift = 4;                       //number needed to be added to port for mapping to the pinout
+    static const int _maxSensors = 8;
+    static const int _maxMotors = 4;
     static const int _DisplayX  = 10;
     static const int _DisplayY  =  4;
 
