@@ -56,3 +56,5 @@ Arduino Library to enable easy use of the Excelsior-Brick.
 - Added "Excelsior" as default thing to be displayed, if nothing else is defined
 - With a DisplayAktualisieren(3), nothing is displayed
 - Fixed Bug with C++ Vector
+### Version 1.1.9
+- The default display is now the Excelsior Logo
