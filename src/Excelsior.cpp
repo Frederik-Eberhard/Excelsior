@@ -20,15 +20,15 @@ Excelsior::Excelsior() : display(128, 64, &Wire2) , bno055(55,0x28,&Wire2){
     pinMode(_pinout[i][2],OUTPUT);  //functions as PWM port       (speed)
   }
 
-  delay(100);  // This delay is needed to let the display to initialize
+  delay(100);                   // This delay is needed to let the display to initialize
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);  // Initialize display with the I2C address of 0x3C
-  display.clearDisplay();  // Clear the buffer
+  display.clearDisplay();       // Clear the buffer
   display.setTextColor(WHITE);  // Set color of the text
-  display.setRotation(0);  // Set orientation. Goes from 0, 1, 2 or 3
-  display.setTextWrap(true);  // By default, long lines of text are set to automatically “wrap” back to the leftmost column.
-                               // To override this behavior (so text will run off the right side of the display - useful for
-                               // scrolling marquee effects), use setTextWrap(false). The normal wrapping behavior is restored
-                               // with setTextWrap(true).
+  display.setRotation(0);       // Set orientation. Goes from 0, 1, 2 or 3
+  display.setTextWrap(true);    // By default, long lines of text are set to automatically “wrap” back to the leftmost column.
+                                // To override this behavior (so text will run off the right side of the display - useful for
+                                // scrolling marquee effects), use setTextWrap(false). The normal wrapping behavior is restored
+                                // with setTextWrap(true).
   display.dim(0);  //Set brightness (0 is maximun and 1 is a little dim)
 
   Wire2.begin();
@@ -37,7 +37,7 @@ Excelsior::Excelsior() : display(128, 64, &Wire2) , bno055(55,0x28,&Wire2){
   }
   delay(100);                   //short wait, to initialize the bno055
   GyroReset();
-  DisplayAktualisieren(-1);     //Shows empty display
+  DisplayAktualisieren(-1);     //Shows default display
 }
 
 //------SENSOR SETUP------------------
@@ -73,6 +73,15 @@ void Excelsior::Motor(int port, int dir){
     digitalWrite(_pinout[port - MOTOR_A][0], dir < 0? HIGH:LOW);   //if dir == 0, then both go LOW (motor off)
     digitalWrite(_pinout[port - MOTOR_A][1], dir > 0? HIGH:LOW);   //else if dir determines direction of rotation
     analogWrite (_pinout[port - MOTOR_A][2], abs(dir));            //takes the absolute value to determine rotation speed
+
+    Serial.print("MOTORS:");
+    Serial.print(port - MOTOR_A);
+    Serial.print(" - ");
+    Serial.print(_pinout[port - MOTOR_A][0]);
+    Serial.print(" ");
+    Serial.print(_pinout[port - MOTOR_A][1]);
+    Serial.print(" ");
+    Serial.println(_pinout[port - MOTOR_A][2]);    
   }
 }
 
@@ -402,10 +411,8 @@ void Excelsior::DisplayAktualisieren(int (&layout)[8], String errorMessage){    
     display.setCursor(0,10);
     display.println(errorMessage);
 
-  }else if(layout[0] == -1){                                     //-1 at the first index displays default text
-    display.setTextSize(0);
-    display.setCursor(15,35);
-    display.println("Excelsior");
+  }else if(layout[0] == -1){                                     //-1 at the first index displays logo
+    display.drawBitmap(0,0, logo, 128, 64, WHITE);
 
   }else if(layout[0] == -2){                                     //-2 at the first index enables custom text
     display.setTextSize(0);
